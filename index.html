@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TROT User List</title>
+  <!-- Import Firebase SDK -->
+  <script type="module">
+    // Import Firebase functions for v9+
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+    import { getDatabase, ref, get, child } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD44keQCFYQMgHeGyIrTvm83Q6IuwXN8i8",
+      authDomain: "my-application-8f94f.firebaseapp.com",
+      databaseURL: "https://my-application-8f94f-default-rtdb.firebaseio.com",
+      projectId: "my-application-8f94f",
+      storageBucket: "my-application-8f94f.appspot.com",
+      messagingSenderId: "335874871221",
+      appId: "1:335874871221:web:fee9ce055d8021b8a553fc"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Get the button and the list display element
+    document.addEventListener("DOMContentLoaded", function () {
+      const fetchUsersButton = document.getElementById("fetchUsers");
+      const userListDisplay = document.getElementById("userList");
+      const userCountDisplay = document.getElementById("userCount");
+
+      // Function to fetch all users
+      function fetchAllUsers() {
+        const dbRef = ref(database);
+
+        get(child(dbRef, '/users')).then((snapshot) => {
+          userListDisplay.innerHTML = ""; // Clear the list before appending
+          if (snapshot.exists()) {
+            const users = snapshot.val();
+            const userCount = Object.keys(users).length; // Count the number of users
+            userCountDisplay.textContent = `Total Users: ${userCount}`; // Update the total user count
+
+            // Create a table for displaying user data
+            const table = document.createElement('table');
+            table.innerHTML = `<tr>
+                                <th>First Name</th>
+                                <th>Points</th>
+                                <th>Referrals</th>
+                              </tr>`;
+
+            Object.keys(users).forEach((userId) => {
+              const user = users[userId];
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${user.firstname}</td>
+                <td>${user.points}</td>
+                <td>${user.referrals}</td>
+              `;
+              table.appendChild(row);
+            });
+
+            userListDisplay.appendChild(table); // Append the table to the display
+          } else {
+            userCountDisplay.textContent = "Total Users: 0";
+            userListDisplay.textContent = "No users found.";
+          }
+        }).catch((error) => {
+          console.error("Error fetching users:", error);
+        });
+      }
+
+      // Event listener for the fetch button
+      fetchUsersButton.addEventListener("click", fetchAllUsers);
+    });
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>TROT Users</h1>
+  <div id="userCount">Total Users: 0</div>
+  <button id="fetchUsers">Fetch Users</button>
+  <div id="userList"></div> <!-- Changed to div to hold the table -->
+
+</body>
+</html>
